@@ -1,0 +1,34 @@
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: apps/frontend/Dockerfile
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - coaching-platform-network
+
+  backend:
+    build:
+      context: ..
+      dockerfile: apps/backend/Dockerfile
+    ports:
+      - "4001:3001"
+    environment:
+      - PORT=3001
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY:-demo_key}
+      - LIVEKIT_SECRET=${LIVEKIT_SECRET:-demo_secret}
+      - LIVEKIT_URL=${LIVEKIT_URL:-wss://demo.livekit.cloud}
+    volumes:
+      - ../apps/backend/src/users.json:/app/users.json
+      - ../apps/backend/src/reset-tokens.json:/app/reset-tokens.json
+    restart: unless-stopped
+    networks:
+      - coaching-platform-network
+
+networks:
+  coaching-platform-network:
+    driver: bridge
